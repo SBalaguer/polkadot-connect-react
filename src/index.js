@@ -4,10 +4,14 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import {SubstrateConnectWrapper} from './Context/SubstrateConnectContext'
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <SubstrateConnectWrapper>
+        <App />
+    </SubstrateConnectWrapper>
   </React.StrictMode>
 );
 

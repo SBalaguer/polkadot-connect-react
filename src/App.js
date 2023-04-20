@@ -1,49 +1,59 @@
-import { useContext, useEffect, useState } from 'react';
+import {  useEffect, useState } from 'react';
 
 import './App.css';
 
-import ApiContext from './Context/SubstrateConnectContext'
-
+import { useApiCreate } from './Context/useApiCreate';
+import { useLocalStorage } from './Context/useLocalStorage'
 
 const App = () => {
   const [head, setNewHead] = useState(null)
 
-  const {api, selectNetwork} = useContext(ApiContext);
+  const [endpoint, setEndpoint] = useLocalStorage("test_endpoint");
+  const [lightClient, setLightClient] = useLocalStorage("test_lightClient");
+  
+  if (!endpoint) setEndpoint('polkadot')
+  if (!endpoint) setLightClient(false)
 
-  const handleClick = (chain, type) => {
-    selectNetwork(chain, type)
-  }
+  const api = useApiCreate({name: endpoint, lightClient: lightClient});
 
   useEffect(() =>{
     const checkHeads = async () => {
       await api.rpc.chain.subscribeNewHeads((lastHeader) => {
         const newHeight =  lastHeader.toHuman().number
         setNewHead(newHeight);
-      })
+      });
     }
 
-    if(api){
+    if(api && api.isConnected){
       checkHeads()
     }
   },[api]);
 
+  const clickThis = (endp, lc) => {
+      setEndpoint(endp);
+      setLightClient(lc);
+      window.location.reload(false);
+  }
+
   return (
     <div className="App">
-      <h1>HEAD: {head}</h1>
+      <h1>Network: {endpoint.toUpperCase()}</h1>
+      <h1>Light Client: {lightClient === true ? 'Yes' : 'No'}</h1>
+      <h2>HEAD: {head}</h2>
 
       <h2>RPC</h2>
       
-      <button onClick={() => handleClick('k', 'rpc')}>Kusama</button>
-      <button onClick={() => handleClick('p', 'rpc')}>polkadot</button>
-      <button onClick={() => handleClick('w', 'rpc')}>westend</button>
-      <button onClick={() => handleClick('r', 'rpc')}>rococo</button>
+      <button disabled={endpoint === 'kusama' && lightClient!=='true'} onClick={() => clickThis('kusama', false)}>Kusama</button>
+      <button disabled={endpoint === 'polkadot' && lightClient!=='true'} onClick={() => clickThis('polkadot', false)}>polkadot</button>
+      <button disabled={endpoint === 'westend' && lightClient!=='true'} onClick={() => clickThis('westend', false)}>westend</button>
+      <button disabled={endpoint === 'rococo' && lightClient!=='true'} onClick={() => clickThis('rococo', false)}>rococo</button>
 
       <h2>Light Client</h2>
 
-      <button onClick={() => handleClick('k', 'lc')}>Kusama</button>
-      <button onClick={() => handleClick('p', 'lc')}>polkadot</button>
-      <button onClick={() => handleClick('w', 'lc')}>westend</button>
-      <button onClick={() => handleClick('r', 'lc')}>rococo</button>
+      <button disabled={endpoint === 'kusama' && lightClient==='true'} onClick={() => clickThis('kusama', true)}>Kusama</button>
+      <button disabled={endpoint === 'polkadot' && lightClient==='true'} onClick={() => clickThis('polkadot', true)}>polkadot</button>
+      <button disabled={endpoint === 'westend' && lightClient==='true'} onClick={() => clickThis('westend', true)}>westend</button>
+      <button disabled={endpoint === 'rococo' && lightClient==='true'} onClick={() => clickThis('rococo', true)}>rococo</button>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 // TODO: Should I first initialize Substrate-connect and then create context?
 // Could be simplified to one context with the value and the update function
 
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 
 import { ScProvider } from "@polkadot/rpc-provider/substrate-connect";
 import * as Sc from "@substrate/connect";
@@ -20,47 +20,38 @@ export function SubstrateConnectWrapper ({ children }) {
     const [isNetworkConnected, setNetworkConnected] = useState(false);
     const [network, setNetwork] = useState('p')
     const [connectionType, setConnectionType] = useState('RPC');
+
+    const [prov, setProv] = useState(null);
+
+    const selectNetwork = useCallback(async (chainID, type) => {
+      if (type === 'lc') {
+          await selectNetworkLC(chainID);
+      } else {
+          await selectNetworkRPC(chainID)
+      }
+      setConnectionType(type)
+      setNetwork(chainID)
+  }, [])
     
-    // by default this connects to Polkadot
-    useEffect(() =>{
-        const startApi = async () => {
-            await selectNetwork(network, connectionType);
-        }
-
-        if(!isNetworkConnected){
-            startApi();
-            setNetworkConnected(true);
-        }
-    },[isNetworkConnected])
-
-    const selectNetwork = async (chainID, type) => {
-        if (type === 'lc') {
-            await selectNetworkLC(chainID);
-        } else {
-            await selectNetworkRPC(chainID)
-        }
-        setConnectionType(type)
-        setNetwork(chainID)
-    }
 
     const selectNetworkLC = async (chainID) => {
         const provider = new ScProvider(Sc, Sc.WellKnownChain[NETWORKS[chainID].sc]);
         await provider.connect()
         const _api = await ApiPromise.create({ provider });
         setConnectedApi(_api)
+        setProv(provider)
     }
 
     //TODO: Make it so that user could also determine it's own RPC endpoint
     const selectNetworkRPC = async (chainID) => {
         const provider = new WsProvider(NETWORKS[chainID].RPC);
+        setProv(provider)
         const _api = await ApiPromise.create({ provider });
         setConnectedApi(_api)
     }
 
-    console.log("inside Provider", api)
-
     return (
-        <ApiContext.Provider value={{api, selectNetwork}}>
+        <ApiContext.Provider value={{api, selectNetwork, prov}}>
             { children }
         </ApiContext.Provider>
     );

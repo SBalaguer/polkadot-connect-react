@@ -8,7 +8,7 @@ import ApiContext from './Context/SubstrateConnectContext'
 const App = () => {
   const [head, setNewHead] = useState(null)
 
-  const {api, selectNetwork} = useContext(ApiContext);
+  const {api, selectNetwork, prov} = useContext(ApiContext);
 
   const handleClick = (chain, type) => {
     selectNetwork(chain, type)
@@ -44,6 +44,8 @@ const App = () => {
       <button onClick={() => handleClick('p', 'lc')}>polkadot</button>
       <button onClick={() => handleClick('w', 'lc')}>westend</button>
       <button onClick={() => handleClick('r', 'lc')}>rococo</button>
+      <br />
+      <button onClick={() => prov.disconnect()}>DISCONNECT</button>
     </div>
   );
 }

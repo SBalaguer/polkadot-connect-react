@@ -38,7 +38,7 @@ const App = () => {
   return (
     <div className="App">
       <h1>Network: {endpoint.toUpperCase()}</h1>
-      <h1>Light Client: {lightClient === true ? 'Yes' : 'No'}</h1>
+      <h1>Light Client: {lightClient === 'true' ? 'Yes' : 'No'}</h1>
       <h2>HEAD: {head}</h2>
 
       <h2>RPC</h2>

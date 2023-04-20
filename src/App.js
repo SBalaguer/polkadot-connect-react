@@ -10,13 +10,10 @@ import useApiSubscription from './unsubscribe-hook';
 const App = () => {
   const [head, setNewHead] = useState(null)
 
-  const {api, selectNetwork, isNetworkConnected, provider} = useContext(ApiContext);
+  const {api, selectNetwork, isNetworkConnected} = useContext(ApiContext);
 
   const handleClick = (chain, type) => {
-    if (provider){
-      provider.disconnect();
-    }
-      selectNetwork(chain, type)
+    selectNetwork(chain, type)
   }
 
 
@@ -32,6 +29,7 @@ const App = () => {
   useApiSubscription(getNewHeads, isNetworkConnected);
 
   return (
+    
     <div className="App">
       <h1>HEAD: {head}</h1>
 

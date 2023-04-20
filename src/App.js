@@ -1,31 +1,35 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 
 import './App.css';
 
 import ApiContext from './Context/SubstrateConnectContext'
 
+import useApiSubscription from './unsubscribe-hook';
+
 
 const App = () => {
   const [head, setNewHead] = useState(null)
 
-  const {api, selectNetwork} = useContext(ApiContext);
+  const {api, selectNetwork, isNetworkConnected, provider} = useContext(ApiContext);
 
   const handleClick = (chain, type) => {
-    selectNetwork(chain, type)
+    if (provider){
+      provider.disconnect();
+    }
+      selectNetwork(chain, type)
   }
 
-  useEffect(() =>{
-    const checkHeads = async () => {
-      await api.rpc.chain.subscribeNewHeads((lastHeader) => {
+
+  const getNewHeads = useCallback(() => {
+    if(api){
+      return api.rpc.chain.subscribeNewHeads((lastHeader) => {
         const newHeight =  lastHeader.toHuman().number
         setNewHead(newHeight);
       })
     }
+  }, [api]);
 
-    if(api){
-      checkHeads()
-    }
-  },[api]);
+  useApiSubscription(getNewHeads, isNetworkConnected);
 
   return (
     <div className="App">
